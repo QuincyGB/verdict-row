@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "verdict-row"
+version = "0.1.0"
+description = "One Python client for the whole Verdict Row x402 fleet — Token Verdict, RouteVerdict, ListSmith, LockSmith and StallRow, with automatic USDC-on-Base payment and Fleet Pass support"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Jobfile Studio" }]
+keywords = ["x402", "base", "usdc", "agents", "payments", "verdict-row"]
+dependencies = [
+    "httpx>=0.27",
+    "eth-account>=0.11",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/verdict_row"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

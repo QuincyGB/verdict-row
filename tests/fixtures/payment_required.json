@@ -1,0 +1,477 @@
+{
+  "x402Version": 2,
+  "error": "Payment required",
+  "resource": {
+    "url": "http://token-verdict-production.up.railway.app/v1/verdict",
+    "description": "Send a token contract address, get a risk verdict. Returns SOLID / CAUTION / DANGER with a 0-100 score, six weighted market-structure signals (liquidity depth, volume churn, sell pressure, price action, trader breadth, pair age) and a written analyst take. Built for AI agents screening tokens before touching them. Use this when an agent is about to buy, swap, or route funds into a token and needs a fast risk screen first.",
+    "mimeType": "application/json",
+    "serviceName": "token-verdict",
+    "tags": [
+      "tokens",
+      "defi",
+      "risk",
+      "research",
+      "agents"
+    ]
+  },
+  "accepts": [
+    {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "amount": "20000",
+      "payTo": "0x097f9685D1e0752bF8B02d61E5Ce9be7eA0FBA7F",
+      "maxTimeoutSeconds": 300,
+      "extra": {
+        "name": "USD Coin",
+        "version": "2"
+      }
+    }
+  ],
+  "extensions": {
+    "bazaar": {
+      "info": {
+        "input": {
+          "type": "http",
+          "method": "POST",
+          "bodyType": "json",
+          "body": {
+            "address": "0x2821d96B5FC81aEC3763340b375a846a89A3Ec1b",
+            "chain": "base"
+          }
+        },
+        "output": {
+          "type": "json",
+          "example": {
+            "token": {
+              "address": "0x2821d96B5FC81aEC3763340b375a846a89A3Ec1b",
+              "symbol": "BASE",
+              "name": "Base King",
+              "chain": "base"
+            },
+            "verdict": "CAUTION",
+            "score": 35.0,
+            "signals": [
+              {
+                "name": "Liquidity depth",
+                "score": 5,
+                "weight": 3,
+                "detail": "Deep liquidity ($259,106) \u2014 the book can absorb real selling."
+              },
+              {
+                "name": "Volume churn",
+                "score": 60,
+                "weight": 2,
+                "detail": "24h volume is just $0 \u2014 effectively no market."
+              },
+              {
+                "name": "Sell pressure",
+                "score": 60,
+                "weight": 2,
+                "detail": "67% sells vs 33% buys \u2014 clear distribution."
+              },
+              {
+                "name": "Price action",
+                "score": 10,
+                "weight": 2,
+                "detail": "24h price action (+0.6%) is unremarkable."
+              },
+              {
+                "name": "Trader breadth",
+                "score": 70,
+                "weight": 1,
+                "detail": "Only 3 transactions in 24h \u2014 a handful of wallets IS the market."
+              },
+              {
+                "name": "Pair age",
+                "score": 5,
+                "weight": 1,
+                "detail": "Pair has meaningful history."
+              }
+            ],
+            "take": "BASE (Base King) trades at $0.0003238 on uniswap with $259.1k in liquidity. Trading has effectively stopped \u2014 $0 of volume across 3 transactions in 24h \u2014 so this is a dormant book, not a live market, whatever the liquidity figure says. Verdict: CAUTION \u2014 tradable at most in small size, and the signals above are why. Don't chase green candles. Not checked: contract honeypot simulation and holder concentration (need a paid indexer) \u2014 this verdict covers market structure only. Chart: https://dexscreener.com/base/0x2821d96b5fc81aec3763340b375a846a89a3ec1b",
+            "market": {
+              "price_usd": "0.0003238",
+              "liquidity_usd": 259106,
+              "volume_24h_usd": 0.01,
+              "price_change_24h_pct": 0.55,
+              "txns_24h": {
+                "buys": 1,
+                "sells": 2
+              },
+              "dex": "uniswap",
+              "pair_url": "https://dexscreener.com/base/0x2821d96b5fc81aec3763340b375a846a89a3ec1b"
+            }
+          },
+          "schema": {
+            "type": "object",
+            "required": [
+              "token",
+              "verdict",
+              "score",
+              "signals",
+              "take",
+              "market"
+            ],
+            "properties": {
+              "token": {
+                "type": "object",
+                "required": [
+                  "address",
+                  "symbol",
+                  "name",
+                  "chain"
+                ],
+                "properties": {
+                  "address": {
+                    "type": "string"
+                  },
+                  "symbol": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "chain": {
+                    "type": "string"
+                  }
+                }
+              },
+              "verdict": {
+                "type": "string",
+                "enum": [
+                  "SOLID",
+                  "CAUTION",
+                  "DANGER"
+                ]
+              },
+              "score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Risk score: 0 (safest) to 100 (riskiest)"
+              },
+              "signals": {
+                "type": "array",
+                "minItems": 6,
+                "maxItems": 6,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "score",
+                    "weight",
+                    "detail"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "score": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100
+                    },
+                    "weight": {
+                      "type": "number"
+                    },
+                    "detail": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "take": {
+                "type": "string",
+                "description": "Written analyst summary"
+              },
+              "market": {
+                "type": "object",
+                "required": [
+                  "price_usd",
+                  "liquidity_usd",
+                  "volume_24h_usd",
+                  "price_change_24h_pct",
+                  "txns_24h",
+                  "dex",
+                  "pair_url"
+                ],
+                "properties": {
+                  "price_usd": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "liquidity_usd": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "volume_24h_usd": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "price_change_24h_pct": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "txns_24h": {
+                    "type": "object",
+                    "properties": {
+                      "buys": {
+                        "type": "integer"
+                      },
+                      "sells": {
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "dex": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "pair_url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "http"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "POST",
+                  "PUT",
+                  "PATCH"
+                ]
+              },
+              "bodyType": {
+                "type": "string",
+                "enum": [
+                  "json",
+                  "form-data",
+                  "text"
+                ]
+              },
+              "body": {
+                "type": "object",
+                "required": [
+                  "address"
+                ],
+                "properties": {
+                  "address": {
+                    "type": "string",
+                    "description": "Token contract address (0x...)"
+                  },
+                  "chain": {
+                    "type": "string",
+                    "enum": [
+                      "base",
+                      "ethereum",
+                      "solana"
+                    ],
+                    "default": "base",
+                    "description": "Chain label: base | ethereum | solana"
+                  }
+                }
+              }
+            },
+            "required": [
+              "type",
+              "method",
+              "bodyType",
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "output": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "example": {
+                "type": "object",
+                "required": [
+                  "token",
+                  "verdict",
+                  "score",
+                  "signals",
+                  "take",
+                  "market"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "object",
+                    "required": [
+                      "address",
+                      "symbol",
+                      "name",
+                      "chain"
+                    ],
+                    "properties": {
+                      "address": {
+                        "type": "string"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "chain": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "verdict": {
+                    "type": "string",
+                    "enum": [
+                      "SOLID",
+                      "CAUTION",
+                      "DANGER"
+                    ]
+                  },
+                  "score": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Risk score: 0 (safest) to 100 (riskiest)"
+                  },
+                  "signals": {
+                    "type": "array",
+                    "minItems": 6,
+                    "maxItems": 6,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name",
+                        "score",
+                        "weight",
+                        "detail"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        },
+                        "weight": {
+                          "type": "number"
+                        },
+                        "detail": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "take": {
+                    "type": "string",
+                    "description": "Written analyst summary"
+                  },
+                  "market": {
+                    "type": "object",
+                    "required": [
+                      "price_usd",
+                      "liquidity_usd",
+                      "volume_24h_usd",
+                      "price_change_24h_pct",
+                      "txns_24h",
+                      "dex",
+                      "pair_url"
+                    ],
+                    "properties": {
+                      "price_usd": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "liquidity_usd": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "volume_24h_usd": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "price_change_24h_pct": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "txns_24h": {
+                        "type": "object",
+                        "properties": {
+                          "buys": {
+                            "type": "integer"
+                          },
+                          "sells": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "dex": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "pair_url": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "schema": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        },
+        "required": [
+          "input"
+        ]
+      }
+    }
+  }
+}
